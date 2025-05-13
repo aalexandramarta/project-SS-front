@@ -1,25 +1,34 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import logo from '../assets/sns_logo.png';
+import { TouchableOpacity } from 'react-native';
 
-export default function MenuScreen() {
+
+export default function MenuScreen({ navigation }: any) {
   return (
-    <View style={styles.container}>
-      <Image source={logo} style={styles.logoImage} />
-      <Text style={styles.title}>Menu</Text>
+<View style={styles.card}>
+  <Text>⭐ AI voice assistance</Text>
+<TouchableOpacity onPress={() => navigation.navigate('Maps')}>
+  <Text>⭐ Maps</Text>
+</TouchableOpacity>
 
-      <View style={styles.card}>
-        <Text>⭐ AI voice assistance</Text>
-        <Text>⭐ Maps</Text>
-        <Text>⭐ Health</Text>
-        <Text>⭐ Personal information</Text>
-        <Text>⭐ AI chatbox 24/7</Text>
-        <Text>⭐ Connect Cane/Walker</Text>
-        <Text>⭐ Connect to visitor</Text>
-      </View>
-    </View>
+<TouchableOpacity onPress={() => navigation.navigate('Health')}>
+  <Text>⭐ Health</Text>
+</TouchableOpacity>
+
+<TouchableOpacity onPress={() => navigation.navigate('AIChatScreen')}>
+  <Text>⭐ AI chatbox 24/7</Text>
+</TouchableOpacity>
+
+
+
+  <Text>⭐ Connect Cane/Walker</Text>
+  <Text>⭐ Connect to visitor</Text>
+</View>
+
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
