@@ -11,9 +11,10 @@ export default function StartScreen({ navigation }: any) {
         <Text>Are you a cane user?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('VisitorSignup')}>
         <Text>Are you a visitor user?</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
