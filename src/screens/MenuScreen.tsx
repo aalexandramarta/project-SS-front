@@ -29,6 +29,11 @@ export default function MenuScreen({ navigation }: any) {
 
         <Text style={styles.menuItem}>⭐ Connect Cane/Walker</Text>
         <Text style={styles.menuItem}>⭐ Connect to visitor</Text>
+
+        <TouchableOpacity onPress={() => navigation.navigate('PersonalInfo')}>
+          <Text style={styles.menuItem}>⭐ Personal information</Text>
+        </TouchableOpacity>
+
       </View>
     </View>
   );

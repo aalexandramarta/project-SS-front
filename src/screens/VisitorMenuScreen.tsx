@@ -27,6 +27,11 @@ export default function VisitorMenuScreen({ navigation }: any) {
           <Text style={styles.menuItem}>⭐ AI chatbox 24/7</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => navigation.navigate('VisitorPersonalInfo')}>
+          <Text style={styles.menuItem}>⭐ Personal information</Text>
+        </TouchableOpacity>
+
+
         <Text style={styles.menuItem}>⭐ Connect to account of Cane/Walker</Text>
       </View>
     </View>
