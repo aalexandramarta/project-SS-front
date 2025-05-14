@@ -18,6 +18,9 @@ import VisitorHealthScreen from './src/screens/VisitorHealthScreen';
 import AIChatScreen from './src/screens/AIChatScreen';
 import VisitorAIChatScreen from './src/screens/VisitorAIChatScreen';
 
+import AIVoiceAssistanceScreen from './src/screens/AIVoiceAssistanceScreen';
+import VisitorAIVoiceAssistanceScreen from './src/screens/VisitorAIVoiceAssistanceScreen';
+
 
 
 const Stack = createNativeStackNavigator();
@@ -31,13 +34,14 @@ export default function App() {
         <Stack.Screen name="Menu" component={MenuScreen} />
         <Stack.Screen name="VisitorSignup" component={VisitorSignupScreen} />
         <Stack.Screen name="VisitorMenu" component={VisitorMenuScreen} />
-      <Stack.Screen name="Maps" component={MapsScreen} />
-      <Stack.Screen name="VisitorMaps" component={VisitorMapsScreen} />
-      <Stack.Screen name="Health" component={HealthScreen} />
-      <Stack.Screen name="VisitorHealth" component={VisitorHealthScreen} />
-      <Stack.Screen name="AIChatScreen" component={AIChatScreen} />
-      <Stack.Screen name="VisitorAIChatScreen" component={VisitorAIChatScreen} />
-
+        <Stack.Screen name="Maps" component={MapsScreen} />
+        <Stack.Screen name="VisitorMaps" component={VisitorMapsScreen} />
+        <Stack.Screen name="Health" component={HealthScreen} />
+        <Stack.Screen name="VisitorHealth" component={VisitorHealthScreen} />
+        <Stack.Screen name="AIChatScreen" component={AIChatScreen} />
+        <Stack.Screen name="VisitorAIChatScreen" component={VisitorAIChatScreen} />
+        <Stack.Screen name="AIVoiceAssistance" component={AIVoiceAssistanceScreen} />
+        <Stack.Screen name="VisitorAIVoiceAssistance" component={VisitorAIVoiceAssistanceScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,44 +1,61 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import logo from '../assets/sns_logo.png';
-import { TouchableOpacity } from 'react-native';
-
 
 export default function MenuScreen({ navigation }: any) {
   return (
-<View style={styles.card}>
-  <Text>⭐ AI voice assistance</Text>
-<TouchableOpacity onPress={() => navigation.navigate('Maps')}>
-  <Text>⭐ Maps</Text>
-</TouchableOpacity>
+    <View style={styles.container}>
+      <Image source={logo} style={styles.logoImage} />
+      <Text style={styles.title}>Menu</Text>
 
-<TouchableOpacity onPress={() => navigation.navigate('Health')}>
-  <Text>⭐ Health</Text>
-</TouchableOpacity>
+      <View style={styles.card}>
+        <TouchableOpacity onPress={() => navigation.navigate('AIVoiceAssistance')}>
+          <Text style={styles.menuItem}>⭐ AI voice assistance</Text>
+        </TouchableOpacity>
 
-<TouchableOpacity onPress={() => navigation.navigate('AIChatScreen')}>
-  <Text>⭐ AI chatbox 24/7</Text>
-</TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Maps')}>
+          <Text style={styles.menuItem}>⭐ Maps</Text>
+        </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => navigation.navigate('Health')}>
+          <Text style={styles.menuItem}>⭐ Health</Text>
+        </TouchableOpacity>
 
+        <Text style={styles.divider} />
 
-  <Text>⭐ Connect Cane/Walker</Text>
-  <Text>⭐ Connect to visitor</Text>
-</View>
+        <TouchableOpacity onPress={() => navigation.navigate('AIChatScreen')}>
+          <Text style={styles.menuItem}>⭐ AI chatbox 24/7</Text>
+        </TouchableOpacity>
 
+        <Text style={styles.menuItem}>⭐ Connect Cane/Walker</Text>
+        <Text style={styles.menuItem}>⭐ Connect to visitor</Text>
+      </View>
+    </View>
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  logoImage: { width: 250, height: 100, resizeMode: 'contain', alignSelf: 'center', marginBottom: 10 },
-  title: { fontSize: 24, textAlign: 'center', marginVertical: 20, fontWeight: '600' },
+  container: { flex: 1, padding: 20, backgroundColor: '#fff', alignItems: 'center' },
+  logoImage: { width: 250, height: 100, resizeMode: 'contain', marginBottom: 10 },
+  title: { fontSize: 24, fontWeight: '600', marginVertical: 10 },
   card: {
-    backgroundColor: '#f9f9f9',
-    padding: 20,
+    backgroundColor: '#fff',
     borderRadius: 12,
-    elevation: 2,
-    gap: 10
-  }
+    padding: 20,
+    width: '100%',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  menuItem: {
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  divider: {
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    marginVertical: 12,
+  },
 });
