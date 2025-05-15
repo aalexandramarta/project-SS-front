@@ -27,13 +27,18 @@ export default function MenuScreen({ navigation }: any) {
           <Text style={styles.menuItem}>⭐ AI chatbox 24/7</Text>
         </TouchableOpacity>
 
-        <Text style={styles.menuItem}>⭐ Connect Cane/Walker</Text>
-        <Text style={styles.menuItem}>⭐ Connect to visitor</Text>
+        {/* ✅ Turned into a working button */}
+        <TouchableOpacity onPress={() => navigation.navigate('QRConnectScreen')}>
+          <Text style={styles.menuItem}>⭐ Connect Cane/Walker</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('VisitorConnect')}>
+          <Text style={styles.menuItem}>⭐ Connect to visitor</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('PersonalInfo')}>
           <Text style={styles.menuItem}>⭐ Personal information</Text>
         </TouchableOpacity>
-
       </View>
     </View>
   );

@@ -29,6 +29,7 @@ import VisitorChoiceScreen from './src/screens/VisitorChoiceScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import VisitorLoginScreen from './src/screens/VisitorLoginScreen';
 
+import QRConnectScreen from './src/screens/QRConnectScreen'; // 
 
 const Stack = createNativeStackNavigator();
 
@@ -55,6 +56,8 @@ export default function App() {
         <Stack.Screen name="VisitorChoice" component={VisitorChoiceScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="VisitorLogin" component={VisitorLoginScreen} />
+        <Stack.Screen name="QRConnectScreen" component={QRConnectScreen} />
+
 
       </Stack.Navigator>
     </NavigationContainer>
