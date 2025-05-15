@@ -32,7 +32,14 @@ export default function VisitorMenuScreen({ navigation }: any) {
         </TouchableOpacity>
 
 
-        <Text style={styles.menuItem}>⭐ Connect to account of Cane/Walker</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('VisitorQRcode')}>
+          <Text style={styles.menuItem}>⭐ Connect cane/walker</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('VisitorQRConnectScreen')}>
+          <Text style={styles.menuItem}>⭐ Connect to account of Cane/Walker</Text>
+        </TouchableOpacity>
+
       </View>
     </View>
   );

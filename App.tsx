@@ -31,6 +31,9 @@ import VisitorLoginScreen from './src/screens/VisitorLoginScreen';
 
 import QRConnectScreen from './src/screens/QRConnectScreen'; // 
 
+import VisitorQRcode from './src/screens/VisitorQRcode';
+import VisitorQRConnectScreen from './src/screens/VisitorQRConnectScreen';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -57,7 +60,8 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="VisitorLogin" component={VisitorLoginScreen} />
         <Stack.Screen name="QRConnectScreen" component={QRConnectScreen} />
-
+        <Stack.Screen name="VisitorQRcode" component={VisitorQRcode} />
+        <Stack.Screen name="VisitorQRConnectScreen" component={VisitorQRConnectScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>
