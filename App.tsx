@@ -24,6 +24,12 @@ import VisitorAIVoiceAssistanceScreen from './src/screens/VisitorAIVoiceAssistan
 import PersonalInfoScreen from './src/screens/PersonalInfoScreen';
 import VisitorPersonalInfoScreen from './src/screens/VisitorPersonalInfoScreen';
 
+import ChoiceScreen from './src/screens/ChoiceScreen';
+import VisitorChoiceScreen from './src/screens/VisitorChoiceScreen';
+import LoginScreen from './src/screens/LoginScreen';
+import VisitorLoginScreen from './src/screens/VisitorLoginScreen';
+
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -45,6 +51,11 @@ export default function App() {
         <Stack.Screen name="VisitorAIVoiceAssistance" component={VisitorAIVoiceAssistanceScreen} />
         <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} />
         <Stack.Screen name="VisitorPersonalInfo" component={VisitorPersonalInfoScreen} />
+        <Stack.Screen name="Choice" component={ChoiceScreen} />
+        <Stack.Screen name="VisitorChoice" component={VisitorChoiceScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="VisitorLogin" component={VisitorLoginScreen} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

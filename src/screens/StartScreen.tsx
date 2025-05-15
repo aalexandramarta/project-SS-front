@@ -7,14 +7,13 @@ export default function StartScreen({ navigation }: any) {
     <View style={styles.container}>
       <Image source={logo} style={styles.logoImage} />
 
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Signup')}>
-        <Text>Are you a cane user?</Text>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Choice')}>
+        <Text style={styles.buttonText}>Are you a cane user?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('VisitorSignup')}>
-        <Text>Are you a visitor user?</Text>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('VisitorChoice')}>
+        <Text style={styles.buttonText}>Are you a visitor user?</Text>
       </TouchableOpacity>
-
     </View>
   );
 }
@@ -30,5 +29,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     elevation: 2
+  },
+  buttonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold'
   }
 });
