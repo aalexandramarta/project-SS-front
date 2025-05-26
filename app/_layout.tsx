@@ -1,29 +1,34 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Redirect, Slot, usePathname } from 'expo-router';
+import { AuthProvider, useAuth } from '../src/context/AuthContext';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+function ProtectedLayout() {
+  const { isLoggedIn, userRole } = useAuth();
+  const pathname = usePathname();
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const publicRoutes = ['/', '/login', '/signup', '/visitor-login', '/choice-screen'];
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
+  // If not logged in and trying to access a protected route
+  if (!isLoggedIn && !publicRoutes.includes(pathname)) {
+    return <Redirect href="/login" />;
   }
 
+  // Prevent visitors from seeing cane login
+  if (isLoggedIn && userRole === 'visitor' && pathname === '/login') {
+    return <Redirect href="/visitorMenu" />;
+  }
+
+  // Prevent cane users from seeing visitor login
+  if (isLoggedIn && userRole === 'cane' && pathname === '/visitor-login') {
+    return <Redirect href="/menu" />;
+  }
+
+  return <Slot />;
+}
+
+export default function Layout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <AuthProvider>
+      <ProtectedLayout />
+    </AuthProvider>
   );
 }
