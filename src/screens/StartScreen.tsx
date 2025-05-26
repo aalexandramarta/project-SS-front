@@ -14,7 +14,7 @@ export default function StartScreen() {
         <Text style={styles.buttonText}>Are you a cane user?</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/visitor-login')}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/visitor-choice')}>
         <Text style={styles.buttonText}>Are you a visitor user?</Text>
       </TouchableOpacity>
     </View>

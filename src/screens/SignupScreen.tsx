@@ -1,12 +1,14 @@
 import axios from 'axios';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import logo from '../assets/sns_logo.png';
 
-export default function SignupScreen({ navigation }: any) {
+export default function SignupScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
 
   const handleRegister = async () => {
     if (!name || !email || !password) {
@@ -23,7 +25,8 @@ export default function SignupScreen({ navigation }: any) {
 
       console.log('Register response:', response.data);
       Alert.alert('Success', 'Registration complete!');
-      navigation.navigate('Menu');
+      router.replace('/menu'); // ✅ consistent with expo-router
+
     } catch (error: any) {
       console.error('Registration error:', error);
       Alert.alert('Error', 'Registration failed. Please try again.');
@@ -32,6 +35,11 @@ export default function SignupScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
+      {/* Manual Back Button */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.header}>Create an account</Text>
 
@@ -68,6 +76,17 @@ export default function SignupScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
   logoImage: { width: 250, height: 100, resizeMode: 'contain', marginBottom: 10 },
   header: { fontSize: 20, fontWeight: 'bold', marginTop: 10, marginBottom: 20 },
   input: { width: '100%', height: 44, borderColor: '#ccc', borderWidth: 1, paddingHorizontal: 10, borderRadius: 8, marginBottom: 12 },

@@ -1,10 +1,17 @@
-// src/screens/QRConnectScreen.tsx
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function QRConnectScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       {/* Logo */}
       <Image source={require('../assets/sns_logo.png')} style={styles.logo} resizeMode="contain" />
 
@@ -32,6 +39,17 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     backgroundColor: '#fff',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007BFF',
+    fontWeight: 'bold',
   },
   logo: {
     width: 180,

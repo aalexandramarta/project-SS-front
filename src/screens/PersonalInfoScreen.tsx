@@ -1,14 +1,15 @@
 import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
-
 export default function PersonalInfoScreen() {
   const { userId } = useAuth();
+  const router = useRouter();
   const [gender, setGender] = useState('Male');
   const [info, setInfo] = useState({
-    name: '', // ✅ new
+    name: '',
     age: '',
     address: '',
     phone: '',
@@ -23,53 +24,105 @@ export default function PersonalInfoScreen() {
     setInfo(prev => ({ ...prev, [field]: value }));
   };
 
-const handleSave = async () => {
-  try {
-    console.log('📦 Sending profile data:', {
-      userId, // ✅ should now be a valid number
-      ...info,
-      gender
-    });
-
-    const response = await fetch('http://192.168.0.135:3000/users/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+  const handleSave = async () => {
+    try {
+      console.log('📦 Sending profile data:', {
         userId,
         ...info,
         gender
-      })
-    });
+      });
 
-    if (!response.ok) throw new Error('Failed to save profile');
+      const response = await fetch('http://192.168.0.135:3000/users/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          ...info,
+          gender
+        })
+      });
 
-    const data = await response.json();
-    alert('Profile saved successfully!');
-    console.log('✅ Server response:', data);
-  } catch (err) {
-    console.error('❌ Save error:', err);
-    alert('Error saving profile.');
-  }
-};
+      if (!response.ok) throw new Error('Failed to save profile');
+
+      const data = await response.json();
+      alert('Profile saved successfully!');
+      console.log('✅ Server response:', data);
+    } catch (err) {
+      console.error('❌ Save error:', err);
+      alert('Error saving profile.');
+    }
+  };
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!userId) {
+        console.log('⏳ Waiting for userId...');
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://192.168.0.135:3000/users/profile/${userId}`);
+        if (!response.ok) {
+          console.log('ℹ️ No existing profile found.');
+          return;
+        }
+
+        const data = await response.json();
+        console.log('📥 Loaded profile data:', data);
+
+        const profile = data.profile || data;
+
+        setInfo({
+          name: profile.name || '',
+          age: profile.age || '',
+          address: profile.address || '',
+          phone: profile.phone || '',
+          emergencyName: profile.emergencyName || '',
+          emergencyPhone: profile.emergencyPhone || '',
+          medication: profile.medication || '',
+          allergies: profile.allergies || '',
+          diseases: profile.diseases || ''
+        });
+
+        setGender(profile.gender || 'Male');
+      } catch (err) {
+        console.error('❌ Error fetching profile:', err);
+      }
+    };
+
+    loadProfile();
+  }, [userId]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Personal Information</Text>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>Name:</Text>
-        <TextInput style={styles.input} value={info.name} onChangeText={v => handleChange('name', v)} />
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Age:</Text>
-        <TextInput style={styles.input} value={info.age} onChangeText={v => handleChange('age', v)} keyboardType="numeric" />
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Address:</Text>
-        <TextInput style={styles.input} value={info.address} onChangeText={v => handleChange('address', v)} />
-      </View>
+      {[
+        ['Name', 'name'],
+        ['Age', 'age'],
+        ['Address', 'address'],
+        ['Phone', 'phone'],
+        ['Emergency Name', 'emergencyName'],
+        ['Emergency Number', 'emergencyPhone'],
+        ['Medication', 'medication'],
+        ['Allergies', 'allergies'],
+        ['Diseases', 'diseases']
+      ].map(([label, key]) => (
+        <View key={key} style={styles.row}>
+          <Text style={styles.label}>{label}:</Text>
+          <TextInput
+            style={styles.input}
+            value={info[key as keyof typeof info]}
+            onChangeText={v => handleChange(key, v)}
+            keyboardType={key === 'age' || key.toLowerCase().includes('phone') ? 'numeric' : 'default'}
+          />
+        </View>
+      ))}
 
       <View style={styles.row}>
         <Text style={styles.label}>Gender:</Text>
@@ -79,36 +132,6 @@ const handleSave = async () => {
             <Picker.Item label="Female" value="Female" />
           </Picker>
         </View>
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Phone:</Text>
-        <TextInput style={styles.input} value={info.phone} onChangeText={v => handleChange('phone', v)} keyboardType="phone-pad" />
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Emergency Name:</Text>
-        <TextInput style={styles.input} value={info.emergencyName} onChangeText={v => handleChange('emergencyName', v)} />
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Emergency Number:</Text>
-        <TextInput style={styles.input} value={info.emergencyPhone} onChangeText={v => handleChange('emergencyPhone', v)} keyboardType="phone-pad" />
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Medication:</Text>
-        <TextInput style={styles.input} value={info.medication} onChangeText={v => handleChange('medication', v)} />
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Allergies:</Text>
-        <TextInput style={styles.input} value={info.allergies} onChangeText={v => handleChange('allergies', v)} />
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Diseases:</Text>
-        <TextInput style={styles.input} value={info.diseases} onChangeText={v => handleChange('diseases', v)} />
       </View>
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -123,6 +146,17 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
     backgroundColor: '#fff'
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold'
   },
   title: {
     fontSize: 20,

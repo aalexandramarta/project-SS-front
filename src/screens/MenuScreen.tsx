@@ -23,7 +23,7 @@ export default function MenuScreen({ navigation }: any) {
           <Text style={styles.menuItem}>⭐ Maps</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Health')}>
+        <TouchableOpacity onPress={() => router.push('/health')}>
           <Text style={styles.menuItem}>⭐ Health</Text>
         </TouchableOpacity>
 
@@ -34,7 +34,7 @@ export default function MenuScreen({ navigation }: any) {
         </TouchableOpacity>
 
         {/* ✅ Turned into a working button */}
-        <TouchableOpacity onPress={() => navigation.navigate('QRConnectScreen')}>
+        <TouchableOpacity onPress={() => router.push('/qrcode')}>
           <Text style={styles.menuItem}>⭐ Connect Cane/Walker</Text>
         </TouchableOpacity>
 

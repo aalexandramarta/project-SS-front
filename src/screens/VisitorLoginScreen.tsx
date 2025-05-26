@@ -17,7 +17,7 @@ export default function VisitorLoginScreen() {
     }
 
     try {
-      const response = await fetch('http://YOUR_API_URL/visitors/login', {
+      const response = await fetch('http://192.168.0.135/visitors/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -30,7 +30,7 @@ export default function VisitorLoginScreen() {
       const data = await response.json();
       console.log('✅ Visitor login success:', data);
 
-      login(data.user.id, 'visitor'); // use real ID and role
+      login(data.user.id, 'visitor');
       router.replace('/visitorMenu');
 
     } catch (err) {
@@ -39,9 +39,13 @@ export default function VisitorLoginScreen() {
     }
   };
 
-  // ✅ You were missing this return block:
   return (
     <View style={styles.container}>
+      {/* Manual Back Button */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.header}>Log in</Text>
       <Text style={styles.subheader}>For a visitor</Text>
@@ -73,6 +77,17 @@ export default function VisitorLoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
   logoImage: { width: 250, height: 100, resizeMode: 'contain', marginBottom: 10 },
   header: { fontSize: 20, fontWeight: 'bold', marginTop: 10 },
   subheader: { fontSize: 16, marginBottom: 20 },

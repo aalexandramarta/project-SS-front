@@ -4,15 +4,12 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 import logo from '../assets/sns_logo.png';
 import { useAuth } from '../context/AuthContext'; // ✅ add this
 
-
-
-export default function LoginScreen({ navigation }: any) {
+export default function LoginScreen() {
   const { login } = useAuth(); // ✅ get login function from AuthContext
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  
   const handleLogin = async () => {
     if (!email || !password) {
       alert('Please enter both email and password.');
@@ -34,7 +31,7 @@ export default function LoginScreen({ navigation }: any) {
       console.log('✅ Login success:', data);
 
       login(data.user.id, 'cane');
-      router.replace('/menu'); // ✅ navigates to protected route
+      router.replace('/menu');
 
     } catch (err) {
       console.error('Login error:', err);
@@ -44,6 +41,11 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
+      {/* Manual Back Button */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.header}>Log in</Text>
       <Text style={styles.subheader}>For a cane user</Text>
@@ -75,6 +77,17 @@ export default function LoginScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
   logoImage: { width: 250, height: 100, resizeMode: 'contain', marginBottom: 10 },
   header: { fontSize: 20, fontWeight: 'bold', marginTop: 10 },
   subheader: { fontSize: 16, marginBottom: 20 },

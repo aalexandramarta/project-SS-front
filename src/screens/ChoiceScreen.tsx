@@ -8,6 +8,10 @@ export default function ChoiceScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+      
       <Image source={logo} style={styles.logo} />
       <Text style={styles.title}>Cane User Account</Text>
 
@@ -33,6 +37,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 10,
     width: '80%'
+  },  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,},
+
+  buttonText: { color: '#fff', fontSize: 16, textAlign: 'center', fontWeight: 'bold' },
+    backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
   },
-  buttonText: { color: '#fff', fontSize: 16, textAlign: 'center', fontWeight: 'bold' }
 });

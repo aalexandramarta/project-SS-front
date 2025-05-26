@@ -5,7 +5,7 @@ function ProtectedLayout() {
   const { isLoggedIn, userRole } = useAuth();
   const pathname = usePathname();
 
-  const publicRoutes = ['/', '/login', '/signup', '/visitor-login', '/choice-screen'];
+  const publicRoutes = ['/', '/login', '/signup', '/visitor-login', '/choice-screen', '/visitor-choice', '/visitor-signup'];
 
   // If not logged in and trying to access a protected route
   if (!isLoggedIn && !publicRoutes.includes(pathname)) {
