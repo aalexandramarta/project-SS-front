@@ -1,8 +1,9 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function VisitorAIChatScreen() {
-
+  const router = useRouter();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
     { id: '1', text: 'Hey, how do I connect my cane with my account?', type: 'sent' },
@@ -19,7 +20,11 @@ export default function VisitorAIChatScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <Text style={styles.header}>Visitor AI Chat</Text>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.header}>Visitor AI Chat</Text>
 
       <FlatList
         style={styles.messages}
@@ -46,8 +51,19 @@ export default function VisitorAIChatScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 10 },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
   header: { fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginVertical: 10 },
-  messages: { flex: 1 },
+  messages: { flex: 1, marginTop: 40 },
   bubble: {
     padding: 12,
     marginVertical: 6,

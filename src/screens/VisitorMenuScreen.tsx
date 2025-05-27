@@ -1,45 +1,60 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import logo from '../assets/sns_logo.png';
+import { useAuth } from '../context/AuthContext';
 
 export default function VisitorMenuScreen({ navigation }: any) {
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/');
+  };
+
   return (
     <View style={styles.container}>
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.title}>Menu</Text>
 
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => navigation.navigate('VisitorAIVoiceAssistance')}>
+        <TouchableOpacity onPress={() => router.push('/visitor-ai-voice')}>
           <Text style={styles.menuItem}>⭐ AI voice assistance</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('VisitorMaps')}>
+        <TouchableOpacity onPress={() => router.push('/visitor-maps')}>
           <Text style={styles.menuItem}>⭐ Maps</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('VisitorHealth')}>
+        <TouchableOpacity onPress={() => router.push('/visitor-health')}>
           <Text style={styles.menuItem}>⭐ Health</Text>
         </TouchableOpacity>
 
         <Text style={styles.divider} />
 
-        <TouchableOpacity onPress={() => navigation.navigate('VisitorAIChatScreen')}>
+        <TouchableOpacity onPress={() => router.push('/visitor-ai-chat')}>
           <Text style={styles.menuItem}>⭐ AI chatbox 24/7</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('VisitorPersonalInfo')}>
+        <TouchableOpacity onPress={() => router.push('/visitor-info')}>
           <Text style={styles.menuItem}>⭐ Personal information</Text>
         </TouchableOpacity>
 
-
-        <TouchableOpacity onPress={() => navigation.navigate('VisitorQRcode')}>
+        <TouchableOpacity onPress={() => router.push('/visitor-qr')}>
           <Text style={styles.menuItem}>⭐ Connect cane/walker</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('VisitorQRConnectScreen')}>
+        <TouchableOpacity onPress={() => router.push('/visitor-qr-connect')}>
           <Text style={styles.menuItem}>⭐ Connect to account of Cane/Walker</Text>
         </TouchableOpacity>
 
+        <Text style={styles.divider} />
+
+        {/* 🚪 Logout button */}
+        <TouchableOpacity onPress={handleLogout}>
+          <Text style={[styles.menuItem, styles.logout]}>🚪 Logout</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -68,5 +83,9 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     marginVertical: 12,
+  },
+  logout: {
+    color: '#c00',
+    fontWeight: 'bold',
   },
 });

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function VisitorPersonalInfoScreen() {
+  const router = useRouter();
+
   const [gender, setGender] = useState('Male');
   const [info, setInfo] = useState({
     name: '',
@@ -26,6 +29,10 @@ export default function VisitorPersonalInfoScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Personal Information</Text>
 
       <View style={styles.row}>
@@ -92,6 +99,17 @@ export default function VisitorPersonalInfoScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: 20, paddingBottom: 40, backgroundColor: '#fff' },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
   title: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, alignSelf: 'center' },
   row: { marginBottom: 15 },
   label: { fontSize: 14, marginBottom: 4, fontWeight: '600' },

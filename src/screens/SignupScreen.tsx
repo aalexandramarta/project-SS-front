@@ -1,55 +1,115 @@
 import axios from 'axios';
+import { makeRedirectUri } from 'expo-auth-session';
+import { useAuthRequest } from 'expo-auth-session/providers/google';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import logo from '../assets/sns_logo.png';
 
-export default function SignupScreen() {
-  const [name, setName] = useState('');
+WebBrowser.maybeCompleteAuthSession();
+
+const getClientId = () => {
+  const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+  return extra.webClientId;
+};
+
+export default function VisitorSignupScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
+
+  const redirectUri = makeRedirectUri({ useProxy: true } as any);
+  const [, response, promptAsync] = useAuthRequest({
+    clientId: getClientId(),
+    redirectUri,
+    scopes: ['profile', 'email'],
+  });
+
+  useEffect(() => {
+    const getUserInfo = async (accessToken: string) => {
+      try {
+        const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        const user = await res.json();
+        console.log('✅ Google user info fetched:', user);
+
+        console.log('📡 Sending to backend...');
+        const response = await axios.post('http://192.168.0.135:3000/users/register', {
+          email: user.email,
+          name: user.name,
+          picture: user.picture,
+          provider: 'google'
+        });
+
+        console.log('✅ Backend response:', response.data);
+        Alert.alert('Login successful!');
+        router.push('/visitor-menu');
+      } catch (error) {
+        console.error('❌ Google registration failed:', error);
+        Alert.alert('Error', 'Could not register Google user.');
+      }
+    };
+
+    if (response?.type === 'success') {
+      const token = response.authentication?.accessToken;
+      if (token) getUserInfo(token);
+    } else if (response?.type === 'error') {
+      Alert.alert('Login failed');
+    }
+  }, [response, router]);
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
+    if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
 
     try {
       const response = await axios.post('http://192.168.0.135:3000/users/register', {
-        name,
         email,
-        password
+        password,
+        provider: 'local'
       });
 
-      console.log('Register response:', response.data);
-      Alert.alert('Success', 'Registration complete!');
-      router.replace('/menu'); // ✅ consistent with expo-router
-
+      console.log('Visitor registered:', response.data);
+      Alert.alert('Success', 'Visitor registration complete!');
+      router.push('/visitor-menu');
     } catch (error: any) {
       console.error('Registration error:', error);
       Alert.alert('Error', 'Registration failed. Please try again.');
     }
   };
 
+  const showMessage = (type: string) => {
+    if (type === 'Terms of Service') {
+      Alert.alert('Terms of Service', 'You agree to use the app responsibly and not misuse user data.');
+    } else {
+      Alert.alert('Privacy Policy', 'We collect only necessary data and never share it without your permission.');
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Manual Back Button */}
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
 
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.header}>Create an account</Text>
+      <Text style={styles.subheader}>For a visitor</Text>
 
-      <TextInput
-        placeholder="Full Name"
-        style={styles.input}
-        onChangeText={setName}
-        value={name}
-        placeholderTextColor="#999"
-      />
       <TextInput
         placeholder="email@domain.com"
         keyboardType="email-address"
@@ -58,8 +118,9 @@ export default function SignupScreen() {
         value={email}
         placeholderTextColor="#999"
       />
+
       <TextInput
-        placeholder="Password"
+        placeholder="password"
         secureTextEntry
         style={styles.input}
         onChangeText={setPassword}
@@ -68,8 +129,24 @@ export default function SignupScreen() {
       />
 
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Register</Text>
+        <Text style={styles.buttonText}>Continue</Text>
       </TouchableOpacity>
+
+      <Text style={styles.or}>or</Text>
+
+      <TouchableOpacity style={styles.oauth} onPress={() => promptAsync()}>
+        <Text>Continue with Google</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.oauth}>
+        <Text>Continue with Apple</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.terms}>
+        By clicking continue, you agree to our{' '}
+        <Text style={styles.link} onPress={() => showMessage('Terms of Service')}>Terms of Service</Text> and{' '}
+        <Text style={styles.link} onPress={() => showMessage('Privacy Policy')}>Privacy Policy</Text>
+      </Text>
     </View>
   );
 }
@@ -88,8 +165,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   logoImage: { width: 250, height: 100, resizeMode: 'contain', marginBottom: 10 },
-  header: { fontSize: 20, fontWeight: 'bold', marginTop: 10, marginBottom: 20 },
+  header: { fontSize: 20, fontWeight: 'bold', marginTop: 10 },
+  subheader: { fontSize: 16, marginBottom: 20 },
   input: { width: '100%', height: 44, borderColor: '#ccc', borderWidth: 1, paddingHorizontal: 10, borderRadius: 8, marginBottom: 12 },
   button: { backgroundColor: '#000', paddingVertical: 12, width: '100%', borderRadius: 8, marginBottom: 10 },
-  buttonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' }
+  buttonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+  or: { marginVertical: 8, color: '#888' },
+  oauth: { backgroundColor: '#eee', paddingVertical: 12, width: '100%', borderRadius: 8, marginBottom: 10, alignItems: 'center' },
+  terms: { fontSize: 12, color: '#666', marginTop: 20, textAlign: 'center' },
+  link: { color: '#000', textDecorationLine: 'underline' }
 });

@@ -1,10 +1,16 @@
-// src/screens/VisitorQRcode.tsx
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function VisitorQRcode() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Image source={require('../assets/sns_logo.png')} style={styles.logo} resizeMode="contain" />
 
       <TouchableOpacity style={styles.button}>
@@ -24,6 +30,17 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     backgroundColor: '#fff',
     paddingHorizontal: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
   },
   logo: {
     width: 200,

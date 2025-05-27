@@ -15,7 +15,7 @@ export default function MenuScreen({ navigation }: any) {
       <Text style={styles.title}>Menu</Text>
 
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => navigation.navigate('AIVoiceAssistance')}>
+        <TouchableOpacity onPress={() => router.push('/ai-voice')}>
           <Text style={styles.menuItem}>⭐ AI voice assistance</Text>
         </TouchableOpacity>
 

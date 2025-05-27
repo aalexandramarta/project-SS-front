@@ -1,14 +1,65 @@
+import axios from 'axios';
+import { makeRedirectUri } from 'expo-auth-session';
+import { useAuthRequest } from 'expo-auth-session/providers/google';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import logo from '../assets/sns_logo.png';
-import { useAuth } from '../context/AuthContext'; // adjust path if needed
+import { useAuth } from '../context/AuthContext';
+
+WebBrowser.maybeCompleteAuthSession();
+
+const getClientId = () => {
+  const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+  return extra.webClientId;
+};
 
 export default function VisitorLoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
   const { login } = useAuth();
+
+  const redirectUri = makeRedirectUri({ useProxy: true } as any);
+  const [, response, promptAsync] = useAuthRequest({
+    clientId: "1060003938013-itqai2kku5vbp9n09et2hnf7nb4rus8e.apps.googleusercontent.com",
+    redirectUri,
+    scopes: ['profile', 'email'],
+  });
+
+  useEffect(() => {
+    const getUserInfo = async (accessToken: string) => {
+      try {
+        const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const user = await res.json();
+        console.log('✅ Google user info:', user);
+
+        const response = await axios.post('http://192.168.0.135:3000/users/register', {
+          email: user.email,
+          name: user.name,
+          picture: user.picture,
+          provider: 'google'
+        });
+
+        console.log('✅ Backend response:', response.data);
+
+        login(response.data.id, 'visitor');
+        router.replace('/visitor-menu');
+      } catch (err) {
+        console.error('❌ Google login failed:', err);
+        Alert.alert('Error', 'Google login failed.');
+      }
+    };
+
+    if (response?.type === 'success') {
+      const token = response.authentication?.accessToken;
+      if (token) getUserInfo(token);
+    }
+  }, [response, router, login]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -17,22 +68,19 @@ export default function VisitorLoginScreen() {
     }
 
     try {
-      const response = await fetch('http://192.168.0.135/visitors/login', {
+      const res = await fetch('http://192.168.0.135:3000/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
 
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
-      }
+      if (!res.ok) throw new Error('Invalid credentials');
 
-      const data = await response.json();
+      const data = await res.json();
       console.log('✅ Visitor login success:', data);
 
       login(data.user.id, 'visitor');
-      router.replace('/visitorMenu');
-
+      router.replace('/visitor-menu');
     } catch (err) {
       console.error('Visitor login error:', err);
       alert('Login failed. Please check your email and password.');
@@ -41,7 +89,6 @@ export default function VisitorLoginScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Manual Back Button */}
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
@@ -70,6 +117,12 @@ export default function VisitorLoginScreen() {
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Continue</Text>
+      </TouchableOpacity>
+
+      <Text style={{ marginVertical: 8, color: '#888' }}>or</Text>
+
+      <TouchableOpacity style={styles.button} onPress={() => promptAsync()}>
+        <Text style={styles.buttonText}>Continue with Google</Text>
       </TouchableOpacity>
     </View>
   );

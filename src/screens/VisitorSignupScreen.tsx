@@ -1,10 +1,95 @@
+import axios from 'axios';
+import { makeRedirectUri } from 'expo-auth-session';
+import { useAuthRequest } from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import logo from '../assets/sns_logo.png';
+import { useAuth } from '../context/AuthContext'; // ✅ Make sure this path is correct
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function VisitorSignupScreen() {
   const router = useRouter();
+  const { login } = useAuth(); // ✅ Login function from context
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const redirectUri = makeRedirectUri({ useProxy: true } as any);
+  const [, response, promptAsync] = useAuthRequest({
+    clientId: "1060003938013-itqai2kku5vbp9n09et2hnf7nb4rus8e.apps.googleusercontent.com",
+    redirectUri,
+    scopes: ['profile', 'email'],
+  });
+
+  useEffect(() => {
+    const getUserInfo = async (accessToken: string) => {
+      try {
+        const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        const user = await res.json();
+        console.log('✅ Google user info fetched:', user);
+
+        const response = await axios.post('http://192.168.0.135:3000/users/register', {
+          email: user.email,
+          name: user.name,
+          picture: user.picture,
+          provider: 'google'
+        });
+
+        console.log('✅ Backend response:', response.data);
+
+        login(response.data.id, 'visitor'); // ✅ Update auth state
+        Alert.alert('Login successful!');
+        router.push('/visitor-menu');
+      } catch (error) {
+        console.error('❌ Google registration failed:', error);
+        Alert.alert('Error', 'Could not register Google user.');
+      }
+    };
+
+    if (response?.type === 'success') {
+      const token = response.authentication?.accessToken;
+      if (token) getUserInfo(token);
+    } else if (response?.type === 'error') {
+      Alert.alert('Login failed');
+    }
+  }, [response, router, login]);
+
+  const handleRegister = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://192.168.0.135:3000/users/register', {
+        email,
+        password,
+        provider: 'local'
+      });
+
+      console.log('Visitor registered:', response.data);
+      login(response.data.id, 'visitor'); // ✅ Mark local user as logged in
+      Alert.alert('Success', 'Visitor registration complete!');
+      router.push('/visitor-menu');
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      Alert.alert('Error', 'Registration failed. Please try again.');
+    }
+  };
 
   const showMessage = (type: string) => {
     if (type === 'Terms of Service') {
@@ -16,7 +101,6 @@ export default function VisitorSignupScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
@@ -29,16 +113,27 @@ export default function VisitorSignupScreen() {
         placeholder="email@domain.com"
         keyboardType="email-address"
         style={styles.input}
+        onChangeText={setEmail}
+        value={email}
         placeholderTextColor="#999"
       />
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/visitorMenu')}>
+      <TextInput
+        placeholder="password"
+        secureTextEntry
+        style={styles.input}
+        onChangeText={setPassword}
+        value={password}
+        placeholderTextColor="#999"
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Continue</Text>
       </TouchableOpacity>
 
       <Text style={styles.or}>or</Text>
 
-      <TouchableOpacity style={styles.oauth}>
+      <TouchableOpacity style={styles.oauth} onPress={() => promptAsync()}>
         <Text>Continue with Google</Text>
       </TouchableOpacity>
 

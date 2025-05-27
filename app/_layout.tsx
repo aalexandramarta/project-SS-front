@@ -9,12 +9,12 @@ function ProtectedLayout() {
 
   // If not logged in and trying to access a protected route
   if (!isLoggedIn && !publicRoutes.includes(pathname)) {
-    return <Redirect href="/login" />;
+    return <Redirect href="/" />;
   }
 
   // Prevent visitors from seeing cane login
   if (isLoggedIn && userRole === 'visitor' && pathname === '/login') {
-    return <Redirect href="/visitorMenu" />;
+    return <Redirect href="/visitor-menu" />;
   }
 
   // Prevent cane users from seeing visitor login

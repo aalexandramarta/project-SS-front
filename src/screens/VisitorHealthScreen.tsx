@@ -1,10 +1,17 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import logo from '../assets/sns_logo.png';
 
 export default function VisitorHealthScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.button}>Health</Text>
 
@@ -39,14 +46,45 @@ export default function VisitorHealthScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 20, alignItems: 'center' },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
   logoImage: { width: 250, height: 100, resizeMode: 'contain', marginBottom: 10 },
-  button: { borderWidth: 1, borderColor: '#007AFF', paddingVertical: 10, paddingHorizontal: 30, borderRadius: 8, marginBottom: 20, fontSize: 18 },
+  button: {
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    marginBottom: 20,
+    fontSize: 18
+  },
   circleContainer: { alignItems: 'center', marginBottom: 20 },
-  circle: { width: 150, height: 150, borderRadius: 75, backgroundColor: '#E6F0FF', alignItems: 'center', justifyContent: 'center' },
+  circle: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: '#E6F0FF',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
   goal: { fontSize: 14, color: '#666' },
   steps: { fontSize: 28, fontWeight: 'bold', color: '#007AFF' },
   stepsLabel: { fontSize: 16 },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 10 },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 10
+  },
   statBox: { alignItems: 'center', flex: 1 },
   statIcon: { fontSize: 18 },
   statValue: { fontSize: 16, fontWeight: 'bold' },
