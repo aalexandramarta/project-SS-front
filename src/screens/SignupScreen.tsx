@@ -23,6 +23,11 @@ const getClientId = () => {
   return extra.webClientId;
 };
 
+const BASE_URL =
+  Constants.expoConfig?.extra?.apiBaseUrl ||
+  Constants.manifest?.extra?.apiBaseUrl ||
+  'http://localhost:3000';
+
 export default function VisitorSignupScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -46,7 +51,7 @@ export default function VisitorSignupScreen() {
         console.log('✅ Google user info fetched:', user);
 
         console.log('📡 Sending to backend...');
-        const response = await axios.post('http://192.168.0.135:3000/users/register', {
+        const response = await axios.post(`${BASE_URL}/users/register`, {
           email: user.email,
           name: user.name,
           picture: user.picture,
@@ -77,7 +82,7 @@ export default function VisitorSignupScreen() {
     }
 
     try {
-      const response = await axios.post('http://192.168.0.135:3000/users/register', {
+      const response = await axios.post(`${BASE_URL}/users/register`, {
         email,
         password,
         provider: 'local'

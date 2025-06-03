@@ -1,8 +1,14 @@
 import { Picker } from '@react-native-picker/picker';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+
+const BASE_URL =
+  Constants.expoConfig?.extra?.apiBaseUrl ||
+  Constants.manifest?.extra?.apiBaseUrl ||
+  'http://localhost:3000';
 
 export default function PersonalInfoScreen() {
   const { userId } = useAuth();
@@ -32,7 +38,7 @@ export default function PersonalInfoScreen() {
         gender
       });
 
-      const response = await fetch('http://192.168.0.135:3000/users/profile', {
+      const response = await fetch(`${BASE_URL}/users/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -61,7 +67,7 @@ export default function PersonalInfoScreen() {
       }
 
       try {
-        const response = await fetch(`http://192.168.0.135:3000/users/profile/${userId}`);
+        const response = await fetch(`${BASE_URL}/users/profile/${userId}`);
         if (!response.ok) {
           console.log('ℹ️ No existing profile found.');
           return;
@@ -95,7 +101,6 @@ export default function PersonalInfoScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Back Button */}
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>

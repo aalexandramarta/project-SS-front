@@ -1,14 +1,21 @@
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import logo from '../assets/sns_logo.png';
 import { useAuth } from '../context/AuthContext'; // ✅ add this
 
+
+
 export default function LoginScreen() {
   const { login } = useAuth(); // ✅ get login function from AuthContext
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const BASE_URL =
+  Constants.expoConfig?.extra?.apiBaseUrl ||
+  Constants.manifest?.extra?.apiBaseUrl ||
+  'http://localhost:3000'; // fallback
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -17,7 +24,7 @@ export default function LoginScreen() {
     }
 
     try {
-      const response = await fetch('http://192.168.0.135:3000/users/login', {
+      const response = await fetch(`${BASE_URL}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

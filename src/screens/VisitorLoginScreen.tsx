@@ -16,6 +16,11 @@ const getClientId = () => {
   return extra.webClientId;
 };
 
+const BASE_URL =
+  Constants.expoConfig?.extra?.apiBaseUrl ||
+  Constants.manifest?.extra?.apiBaseUrl ||
+  'http://localhost:3000';
+
 export default function VisitorLoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +29,7 @@ export default function VisitorLoginScreen() {
 
   const redirectUri = makeRedirectUri({ useProxy: true } as any);
   const [, response, promptAsync] = useAuthRequest({
-    clientId: "1060003938013-itqai2kku5vbp9n09et2hnf7nb4rus8e.apps.googleusercontent.com",
+    clientId: getClientId(),
     redirectUri,
     scopes: ['profile', 'email'],
   });
@@ -38,7 +43,7 @@ export default function VisitorLoginScreen() {
         const user = await res.json();
         console.log('✅ Google user info:', user);
 
-        const response = await axios.post('http://192.168.0.135:3000/users/register', {
+        const response = await axios.post(`${BASE_URL}/users/register`, {
           email: user.email,
           name: user.name,
           picture: user.picture,
@@ -68,7 +73,7 @@ export default function VisitorLoginScreen() {
     }
 
     try {
-      const res = await fetch('http://192.168.0.135:3000/users/login', {
+      const res = await fetch(`${BASE_URL}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

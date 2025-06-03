@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { makeRedirectUri } from 'expo-auth-session';
 import { useAuthRequest } from 'expo-auth-session/providers/google';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
@@ -14,13 +15,18 @@ import {
   View
 } from 'react-native';
 import logo from '../assets/sns_logo.png';
-import { useAuth } from '../context/AuthContext'; // ✅ Make sure this path is correct
+import { useAuth } from '../context/AuthContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
+const BASE_URL =
+  Constants.expoConfig?.extra?.apiBaseUrl ||
+  Constants.manifest?.extra?.apiBaseUrl ||
+  'http://localhost:3000';
+
 export default function VisitorSignupScreen() {
   const router = useRouter();
-  const { login } = useAuth(); // ✅ Login function from context
+  const { login } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,7 +48,7 @@ export default function VisitorSignupScreen() {
         const user = await res.json();
         console.log('✅ Google user info fetched:', user);
 
-        const response = await axios.post('http://192.168.0.135:3000/users/register', {
+        const response = await axios.post(`${BASE_URL}/users/register`, {
           email: user.email,
           name: user.name,
           picture: user.picture,
@@ -51,7 +57,7 @@ export default function VisitorSignupScreen() {
 
         console.log('✅ Backend response:', response.data);
 
-        login(response.data.id, 'visitor'); // ✅ Update auth state
+        login(response.data.id, 'visitor');
         Alert.alert('Login successful!');
         router.push('/visitor-menu');
       } catch (error) {
@@ -75,14 +81,14 @@ export default function VisitorSignupScreen() {
     }
 
     try {
-      const response = await axios.post('http://192.168.0.135:3000/users/register', {
+      const response = await axios.post(`${BASE_URL}/users/register`, {
         email,
         password,
         provider: 'local'
       });
 
       console.log('Visitor registered:', response.data);
-      login(response.data.id, 'visitor'); // ✅ Mark local user as logged in
+      login(response.data.id, 'visitor');
       Alert.alert('Success', 'Visitor registration complete!');
       router.push('/visitor-menu');
     } catch (error: any) {

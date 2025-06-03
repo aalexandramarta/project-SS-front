@@ -20,6 +20,7 @@
     "axios": "^1.9.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "expo": "~53.0.9",
     "expo-auth-session": "~6.1.5",
     "expo-blur": "~14.1.4",

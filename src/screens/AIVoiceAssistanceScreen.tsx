@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, /*TouchableOpacity*/ } from 'react-native';
 import logo from '../assets/sns_logo.png';
 
 export default function AIVoiceAssistanceScreen() {
@@ -10,7 +10,7 @@ export default function AIVoiceAssistanceScreen() {
 
       <View style={styles.card}>
         <Text style={styles.info}>
-          Press on the voice button to activate the AI voice assistance or say "Hello S&S"
+          Press on the voice button to activate the AI voice assistance or say Hello S&S
         </Text>
       </View>
 
