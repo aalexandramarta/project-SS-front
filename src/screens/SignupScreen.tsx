@@ -15,27 +15,25 @@ import {
   View
 } from 'react-native';
 import logo from '../assets/sns_logo.png';
+import { useAuth } from '../context/AuthContext';
 
 WebBrowser.maybeCompleteAuthSession();
-
-const getClientId = () => {
-  const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
-  return extra.webClientId;
-};
 
 const BASE_URL =
   Constants.expoConfig?.extra?.apiBaseUrl ||
   Constants.manifest?.extra?.apiBaseUrl ||
   'http://localhost:3000';
 
-export default function VisitorSignupScreen() {
+export default function SignupScreen() {
   const router = useRouter();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const redirectUri = makeRedirectUri({ useProxy: true } as any);
   const [, response, promptAsync] = useAuthRequest({
-    clientId: getClientId(),
+    clientId: "1060003938013-itqai2kku5vbp9n09et2hnf7nb4rus8e.apps.googleusercontent.com",
     redirectUri,
     scopes: ['profile', 'email'],
   });
@@ -50,7 +48,6 @@ export default function VisitorSignupScreen() {
         const user = await res.json();
         console.log('✅ Google user info fetched:', user);
 
-        console.log('📡 Sending to backend...');
         const response = await axios.post(`${BASE_URL}/users/register`, {
           email: user.email,
           name: user.name,
@@ -59,8 +56,9 @@ export default function VisitorSignupScreen() {
         });
 
         console.log('✅ Backend response:', response.data);
+        login(response.data.id, 'cane');
         Alert.alert('Login successful!');
-        router.push('/visitor-menu');
+        router.push('/menu');
       } catch (error) {
         console.error('❌ Google registration failed:', error);
         Alert.alert('Error', 'Could not register Google user.');
@@ -73,7 +71,7 @@ export default function VisitorSignupScreen() {
     } else if (response?.type === 'error') {
       Alert.alert('Login failed');
     }
-  }, [response, router]);
+  }, [response]);
 
   const handleRegister = async () => {
     if (!email || !password) {
@@ -88,9 +86,10 @@ export default function VisitorSignupScreen() {
         provider: 'local'
       });
 
-      console.log('Visitor registered:', response.data);
-      Alert.alert('Success', 'Visitor registration complete!');
-      router.push('/visitor-menu');
+      console.log('User registered:', response.data);
+      login(response.data.id, 'cane');
+      Alert.alert('Success', 'Cane user registration complete!');
+      router.push('/menu');
     } catch (error: any) {
       console.error('Registration error:', error);
       Alert.alert('Error', 'Registration failed. Please try again.');
@@ -113,24 +112,24 @@ export default function VisitorSignupScreen() {
 
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.header}>Create an account</Text>
-      <Text style={styles.subheader}>For a visitor</Text>
+      <Text style={styles.subheader}>For a cane user</Text>
 
       <TextInput
         placeholder="email@domain.com"
         keyboardType="email-address"
         style={styles.input}
-        onChangeText={setEmail}
-        value={email}
         placeholderTextColor="#999"
+        value={email}
+        onChangeText={setEmail}
       />
 
       <TextInput
         placeholder="password"
         secureTextEntry
         style={styles.input}
-        onChangeText={setPassword}
-        value={password}
         placeholderTextColor="#999"
+        value={password}
+        onChangeText={setPassword}
       />
 
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
@@ -150,7 +149,7 @@ export default function VisitorSignupScreen() {
       <Text style={styles.terms}>
         By clicking continue, you agree to our{' '}
         <Text style={styles.link} onPress={() => showMessage('Terms of Service')}>Terms of Service</Text> and{' '}
-        <Text style={styles.link} onPress={() => showMessage('Privacy Policy')}>Privacy Policy</Text>
+        <Text style={styles.link} onPress={() => showMessage('Privacy Policy')}>Privacy Policy</Text>.
       </Text>
     </View>
   );

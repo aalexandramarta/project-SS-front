@@ -13,7 +13,10 @@ WebBrowser.maybeCompleteAuthSession();
 
 const getClientId = () => {
   const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
-  return extra.webClientId;
+  if (!extra.webClientId) {
+    console.warn('⚠️ webClientId is missing in app.json or app.config.js!');
+  }
+  return extra.webClientId || 'MISSING_CLIENT_ID';
 };
 
 const BASE_URL =
