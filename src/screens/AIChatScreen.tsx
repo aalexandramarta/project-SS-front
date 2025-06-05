@@ -8,8 +8,15 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  
 } from 'react-native';
+import Constants from 'expo-constants';
+
+const BASE_URL =
+  Constants.expoConfig?.extra?.apiBaseUrl ||
+  Constants.manifest?.extra?.apiBaseUrl ||
+  'http://localhost:3000';
 
 // Define the type for chat messages
 type Message = {
@@ -32,7 +39,7 @@ export default function AIChatScreen() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/chat', {
+      const response = await fetch(`${BASE_URL}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage.text })
