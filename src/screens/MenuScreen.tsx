@@ -19,6 +19,10 @@ export default function MenuScreen({ navigation }: any) {
           <Text style={styles.menuItem}>⭐ AI voice assistance</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => router.push('/weather-screen')}>
+                  <Text style={styles.menuItem}>⭐ Weather</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity onPress={() => router.push('/maps')}>
           <Text style={styles.menuItem}>⭐ Maps</Text>
         </TouchableOpacity>

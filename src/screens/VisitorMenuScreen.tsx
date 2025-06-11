@@ -23,6 +23,10 @@ export default function VisitorMenuScreen({ navigation }: any) {
           <Text style={styles.menuItem}>⭐ AI voice assistance</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => router.push('/weather-screen')}>
+          <Text style={styles.menuItem}>⭐ Weather</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity onPress={() => router.push('/visitor-maps')}>
           <Text style={styles.menuItem}>⭐ Maps</Text>
         </TouchableOpacity>
