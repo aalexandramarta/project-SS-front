@@ -1,42 +1,136 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import axios from 'axios';
+import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import logo from '../assets/sns_logo.png';
+import { useAuth } from '../context/AuthContext';
+
+interface HealthEntry {
+  id?: number;
+  user_id?: number;
+  date?: string;
+  steps?: number;
+  distance_km_?: number;
+  calories?: number;
+  time?: string;
+}
 
 export default function HealthScreen() {
+  const router = useRouter();
+  const { userId } = useAuth();
+
+  const [health, setHealth] = useState<HealthEntry | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [stepCount, setStepCount] = useState(0);
+
+  const BASE_URL =
+    Constants.expoConfig?.extra?.apiBaseUrl ||
+    Constants.manifest?.extra?.apiBaseUrl ||
+    'http://localhost:3000';
+
+  useEffect(() => {
+    const fetchHealthData = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/health/${userId}`);
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+        const todayEntry = res.data.find((entry: HealthEntry) =>
+          entry.date?.startsWith(today)
+        );
+
+        if (todayEntry) {
+          setHealth(todayEntry);
+        }
+      } catch (err) {
+        console.error('Error fetching health data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) fetchHealthData();
+  }, [userId]);
+
+  const saveProgress = async () => {
+    try {
+      const res = await axios.post(`${BASE_URL}/health`, {
+        user_id: userId,
+        date: new Date(),
+        steps: stepCount,
+        distance_km_: 0,
+        calories: 0,
+      });
+      alert('✅ Progress saved!');
+      console.log('Step data saved:', res.data);
+    } catch (err) {
+      console.error('❌ Failed to save progress:', err);
+      alert('Failed to save progress.');
+    }
+  };
+
+  if (loading) {
+    return <ActivityIndicator size="large" style={{ marginTop: 100 }} />;
+  }
+
+  const steps = health?.steps ?? 0;
+  const distance = health?.distance_km_ ?? 0;
+  const calories = health?.calories ?? 0;
+  const time = health?.time ?? '0h 0m';
+
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.healthButton}>Health</Text>
 
       <View style={styles.circle}>
         <Text style={styles.stepsLabel}>Goal: 6000</Text>
-        <Text style={styles.stepsValue}>2986</Text>
+        <Text style={styles.stepsValue}>{stepCount}</Text>
         <Text style={styles.stepsUnit}>Steps</Text>
       </View>
 
       <View style={styles.statsRow}>
         <View style={styles.stat}>
           <Text style={styles.statIcon}>📍</Text>
-          <Text style={styles.statValue}>1.86</Text>
-          <Text style={styles.statLabel}>Mile</Text>
+          <Text style={styles.statValue}>{distance}</Text>
+          <Text style={styles.statLabel}>KM</Text>
         </View>
         <View style={styles.stat}>
           <Text style={styles.statIcon}>🔥</Text>
-          <Text style={styles.statValue}>162</Text>
+          <Text style={styles.statValue}>{calories}</Text>
           <Text style={styles.statLabel}>Kcal</Text>
         </View>
         <View style={styles.stat}>
           <Text style={styles.statIcon}>⏱️</Text>
-          <Text style={styles.statValue}>0h 0m</Text>
+          <Text style={styles.statValue}>{time}</Text>
           <Text style={styles.statLabel}>Time</Text>
         </View>
       </View>
+
+      <TouchableOpacity style={styles.saveButton} onPress={saveProgress}>
+        <Text style={styles.saveButtonText}>Save Progress</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', backgroundColor: '#fff', paddingTop: 60 },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
   logoImage: { width: 250, height: 100, resizeMode: 'contain', marginBottom: 10 },
   healthButton: {
     borderWidth: 1,
@@ -60,7 +154,6 @@ const styles = StyleSheet.create({
   stepsLabel: { color: '#fff', fontSize: 12 },
   stepsValue: { color: '#fff', fontSize: 28, fontWeight: 'bold' },
   stepsUnit: { color: '#fff', fontSize: 14 },
-
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -71,4 +164,16 @@ const styles = StyleSheet.create({
   statIcon: { fontSize: 18 },
   statValue: { fontSize: 18, fontWeight: 'bold' },
   statLabel: { fontSize: 12, color: '#444' },
+  saveButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    marginTop: 30,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
