@@ -73,24 +73,22 @@ export default function PersonalInfoScreen() {
           return;
         }
 
-        const data = await response.json();
-        console.log('📥 Loaded profile data:', data);
-
-        const profile = data.profile || data;
+        const profile = await response.json();
+        console.log('📥 Loaded profile data:', profile);
 
         setInfo({
-          name: profile.name || '',
-          age: profile.age || '',
-          address: profile.address || '',
-          phone: profile.phone || '',
-          emergencyName: profile.emergencyName || '',
-          emergencyPhone: profile.emergencyPhone || '',
-          medication: profile.medication || '',
-          allergies: profile.allergies || '',
-          diseases: profile.diseases || ''
+          name: profile.name ?? '',
+          age: profile.age !== null && profile.age !== undefined ? profile.age.toString() : '',
+          address: profile.address ?? '',
+          phone: profile.phone ?? '',
+          emergencyName: profile.emergencyName ?? '',
+          emergencyPhone: profile.emergencyPhone ?? '',
+          medication: profile.medication ?? '',
+          allergies: profile.allergies ?? '',
+          diseases: profile.diseases ?? '',
         });
 
-        setGender(profile.gender || 'Male');
+        setGender(profile.gender ?? 'Male');
       } catch (err) {
         console.error('❌ Error fetching profile:', err);
       }

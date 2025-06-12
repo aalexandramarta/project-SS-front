@@ -31,6 +31,10 @@ export default function MenuScreen({ navigation }: any) {
           <Text style={styles.menuItem}>⭐ Health</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => router.push('/medication-reminder')}>
+          <Text style={styles.menuItem}>⭐ Medication reminder</Text>
+        </TouchableOpacity>
+
         <Text style={styles.divider} />
 
         <TouchableOpacity onPress={() => router.push('/ai-chat')}>

@@ -1,3 +1,5 @@
+import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,16 +11,13 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  
 } from 'react-native';
-import Constants from 'expo-constants';
 
 const BASE_URL =
   Constants.expoConfig?.extra?.apiBaseUrl ||
   Constants.manifest?.extra?.apiBaseUrl ||
   'http://localhost:3000';
 
-// Define the type for chat messages
 type Message = {
   id: string;
   text: string;
@@ -26,6 +25,7 @@ type Message = {
 };
 
 export default function AIChatScreen() {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ export default function AIChatScreen() {
       const response = await fetch(`${BASE_URL}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage.text })
+        body: JSON.stringify({ message: userMessage.text }),
       });
 
       const data = await response.json();
@@ -50,17 +50,20 @@ export default function AIChatScreen() {
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: data.reply || '🤖 Sorry, I didn’t catch that.',
-        type: 'received'
+        type: 'received',
       };
 
       setMessages(prev => [...prev, botMessage]);
     } catch (err) {
       console.error('AI Error:', err);
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        text: '❌ Failed to reach AI. Try again later.',
-        type: 'received'
-      }]);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          text: '❌ Failed to reach AI. Try again later.',
+          type: 'received',
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -73,7 +76,15 @@ export default function AIChatScreen() {
   );
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {/* Back Button */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <FlatList
         data={messages}
         renderItem={renderItem}
@@ -100,20 +111,31 @@ export default function AIChatScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  chatContainer: { padding: 10 },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
+  chatContainer: { padding: 10, paddingTop: 90 }, // add top padding so chat isn't behind back button
   message: {
     padding: 10,
     marginVertical: 4,
     borderRadius: 8,
-    maxWidth: '80%'
+    maxWidth: '80%',
   },
   sent: {
     alignSelf: 'flex-end',
-    backgroundColor: '#DCF8C6'
+    backgroundColor: '#DCF8C6',
   },
   received: {
     alignSelf: 'flex-start',
-    backgroundColor: '#E2E2E2'
+    backgroundColor: '#E2E2E2',
   },
   messageText: { fontSize: 16 },
   inputContainer: {
@@ -122,7 +144,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#ccc',
     alignItems: 'center',
-    backgroundColor: '#fafafa'
+    backgroundColor: '#fafafa',
   },
   input: {
     flex: 1,
@@ -132,13 +154,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
-    marginRight: 8
+    marginRight: 8,
   },
   sendButton: {
     backgroundColor: '#007AFF',
     paddingHorizontal: 15,
     paddingVertical: 10,
-    borderRadius: 8
+    borderRadius: 8,
   },
-  sendText: { color: '#fff', fontWeight: 'bold' }
+  sendText: { color: '#fff', fontWeight: 'bold' },
 });

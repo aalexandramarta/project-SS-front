@@ -1,7 +1,9 @@
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function WeatherScreen() {
+  const router = useRouter();
   const [weather, setWeather] = useState<any>(null);
   const [precipitation, setPrecipitation] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,9 +45,16 @@ export default function WeatherScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>🌤️ Weather in Mechelen</Text>
       <Text style={styles.temp}>{Math.round(weather.temperature)}°C</Text>
-      <Text style={styles.detail}>💨 Wind: {weather.windspeed} km/h {direction(weather.winddirection)}</Text>
+      <Text style={styles.detail}>
+        💨 Wind: {weather.windspeed} km/h {direction(weather.winddirection)}
+      </Text>
       {precipitation !== null && (
         <Text style={styles.detail}>
           ☔ Rain: {precipitation > 0 ? `${precipitation} mm/h` : 'No rain'}
@@ -58,10 +67,47 @@ export default function WeatherScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  temp: { fontSize: 64, fontWeight: 'bold', marginBottom: 10 },
-  detail: { fontSize: 18, marginVertical: 2 },
-  note: { fontSize: 16, marginTop: 20, color: '#555', textAlign: 'center' },
-  error: { marginTop: 40, fontSize: 16, color: 'red' },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff', // Added white background
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  temp: {
+    fontSize: 64,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  detail: {
+    fontSize: 18,
+    marginVertical: 2,
+  },
+  note: {
+    fontSize: 16,
+    marginTop: 20,
+    color: '#555',
+    textAlign: 'center',
+  },
+  error: {
+    marginTop: 40,
+    fontSize: 16,
+    color: 'red',
+  },
 });
