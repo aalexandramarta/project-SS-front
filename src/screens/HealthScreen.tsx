@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
+import { Pedometer } from 'expo-sensors';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import logo from '../assets/sns_logo.png';
@@ -23,6 +24,8 @@ export default function HealthScreen() {
   const [health, setHealth] = useState<HealthEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [stepCount, setStepCount] = useState(0);
+  const [activeMinutes, setActiveMinutes] = useState(0); // ✅ real time tracker
+  const [lastStepCount, setLastStepCount] = useState(0);
 
   const BASE_URL =
     Constants.expoConfig?.extra?.apiBaseUrl ||
@@ -52,14 +55,44 @@ export default function HealthScreen() {
     if (userId) fetchHealthData();
   }, [userId]);
 
+  // Step counter
+  useEffect(() => {
+    const subscription = Pedometer.watchStepCount(result => {
+      setStepCount(result.steps);
+    });
+
+    return () => subscription.remove();
+  }, []);
+
+  // Real timer that tracks active minutes while walking
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    if (stepCount > lastStepCount) {
+      interval = setInterval(() => {
+        setActiveMinutes(prev => prev + 1);
+      }, 60000); // every 60 seconds
+      setLastStepCount(stepCount);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [stepCount]);
+
   const saveProgress = async () => {
+    const distanceKm = parseFloat((stepCount * 0.00078).toFixed(2));
+    const caloriesBurned = parseFloat((stepCount * 0.04).toFixed(1));
+    const timeSpent = `${Math.floor(activeMinutes / 60)}h ${activeMinutes % 60}m`;
+
     try {
       const res = await axios.post(`${BASE_URL}/health`, {
         user_id: userId,
         date: new Date(),
         steps: stepCount,
-        distance_km_: 0,
-        calories: 0,
+        distance_km_: distanceKm,
+        calories: caloriesBurned,
+        time: timeSpent,
       });
       alert('✅ Progress saved!');
       console.log('Step data saved:', res.data);
@@ -73,10 +106,9 @@ export default function HealthScreen() {
     return <ActivityIndicator size="large" style={{ marginTop: 100 }} />;
   }
 
-  const steps = health?.steps ?? 0;
-  const distance = health?.distance_km_ ?? 0;
-  const calories = health?.calories ?? 0;
-  const time = health?.time ?? '0h 0m';
+  const distance = parseFloat((stepCount * 0.00078).toFixed(2));
+  const calories = parseFloat((stepCount * 0.04).toFixed(1));
+  const time = `${Math.floor(activeMinutes / 60)}h ${activeMinutes % 60}m`;
 
   return (
     <View style={styles.container}>
