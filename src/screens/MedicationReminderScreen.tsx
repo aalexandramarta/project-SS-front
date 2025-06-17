@@ -1,9 +1,11 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -30,11 +32,19 @@ export default function MedicationReminderScreen() {
     Constants.manifest?.extra?.apiBaseUrl ||
     'http://localhost:3000';
 
-  const [medications, setMedications] = useState<Medication[]>([
-    { name: '', dosage: '', instruction: '', frequency: '', reminderTimes: [''] },
-  ]);
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [showPicker, setShowPicker] = useState<{ medIndex: number; timeIndex: number } | null>(null);
 
-  // Optional: Load existing meds on mount (if needed)
+  useEffect(() => {
+    const requestPermission = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission denied', 'Notifications will not work unless allowed.');
+      }
+    };
+    requestPermission();
+  }, []);
+
   useEffect(() => {
     const fetchMeds = async () => {
       try {
@@ -69,22 +79,46 @@ export default function MedicationReminderScreen() {
     setMedications(updated);
   };
 
-  const handleReminderChange = (index: number, timeIndex: number, value: string) => {
+  const showTimePicker = (medIndex: number, timeIndex: number) => {
+    setShowPicker({ medIndex, timeIndex });
+  };
+
+  const onTimeSelected = (_event: any, selectedDate?: Date) => {
+    if (selectedDate && showPicker) {
+      const hours = selectedDate.getHours().toString().padStart(2, '0');
+      const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
+      const newTime = `${hours}:${minutes}`;
+      const updated = [...medications];
+      updated[showPicker.medIndex].reminderTimes[showPicker.timeIndex] = newTime;
+      setMedications(updated);
+    }
+    setShowPicker(null);
+  };
+
+  const addReminderTime = (index: number) => {
     const updated = [...medications];
-    updated[index].reminderTimes[timeIndex] = value;
+    updated[index].reminderTimes.push('12:00');
     setMedications(updated);
   };
 
   const addMedication = () => {
     setMedications([
       ...medications,
-      { name: '', dosage: '', instruction: '', frequency: '', reminderTimes: [''] },
+      { name: '', dosage: '', instruction: '', frequency: '', reminderTimes: ['12:00'] },
     ]);
   };
 
-  const addReminderTime = (index: number) => {
+  const deleteMedication = async (index: number) => {
+    const medToDelete = medications[index];
+    try {
+      await fetch(`${BASE_URL}/medications/${userId}/${encodeURIComponent(medToDelete.name)}`, {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.warn('Failed to delete from backend, continuing anyway');
+    }
     const updated = [...medications];
-    updated[index].reminderTimes.push('');
+    updated.splice(index, 1);
     setMedications(updated);
   };
 
@@ -118,7 +152,6 @@ export default function MedicationReminderScreen() {
 
         if (!response.ok) throw new Error('Failed to save medication');
 
-        // Local notification for each reminder time
         for (const timeStr of validTimes) {
           const [hour, minute] = timeStr.split(':').map(Number);
           await Notifications.scheduleNotificationAsync({
@@ -175,25 +208,27 @@ export default function MedicationReminderScreen() {
           />
           <TextInput
             style={styles.input}
-            placeholder="Reminder Frequency (e.g., daily, weekly)"
+            placeholder="Reminder Frequency (e.g., daily)"
             value={med.frequency}
             onChangeText={(val) => handleChange(index, 'frequency', val)}
           />
 
-          <Text style={styles.label}>Reminder Times (HH:mm):</Text>
+          <Text style={styles.label}>Reminder Times:</Text>
           {med.reminderTimes.map((time, tIndex) => (
-            <TextInput
+            <TouchableOpacity
               key={tIndex}
-              style={styles.input}
-              placeholder="e.g., 08:00"
-              value={time}
-              onChangeText={(val) => handleReminderChange(index, tIndex, val)}
-              keyboardType="numeric"
-            />
+              style={styles.timeButton}
+              onPress={() => showTimePicker(index, tIndex)}
+            >
+              <Text style={styles.timeText}>{time}</Text>
+            </TouchableOpacity>
           ))}
-
           <TouchableOpacity onPress={() => addReminderTime(index)} style={styles.subButton}>
             <Text style={styles.saveText}>+ Add Time</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => deleteMedication(index)} style={styles.deleteButton}>
+            <Text style={styles.saveText}>🗑️ Delete Medication</Text>
           </TouchableOpacity>
         </View>
       ))}
@@ -205,73 +240,49 @@ export default function MedicationReminderScreen() {
       <TouchableOpacity onPress={handleSubmit} style={styles.saveButton}>
         <Text style={styles.saveText}>Save All Reminders</Text>
       </TouchableOpacity>
+
+      {showPicker && (
+        <DateTimePicker
+          mode="time"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          value={new Date()}
+          onChange={onTimeSelected}
+        />
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    paddingBottom: 40,
-    backgroundColor: '#fff',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    zIndex: 10,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: 'bold',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    alignSelf: 'center',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
+  container: { padding: 20, backgroundColor: '#fff', paddingBottom: 40 },
+  backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
+  backButtonText: { fontSize: 16, color: '#007AFF', fontWeight: 'bold' },
+  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, alignSelf: 'center' },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 10 },
   card: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 20,
+    borderWidth: 1, borderColor: '#ccc', padding: 15,
+    borderRadius: 8, marginBottom: 20,
   },
-  label: {
-    marginTop: 10,
-    marginBottom: 5,
-    fontWeight: '500',
-  },
+  label: { marginTop: 10, marginBottom: 5, fontWeight: '500' },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    height: 40,
-    marginBottom: 10,
+    borderWidth: 1, borderColor: '#ccc', borderRadius: 6,
+    paddingHorizontal: 10, height: 40, marginBottom: 10,
   },
-  subButton: {
-    backgroundColor: '#AAA',
-    padding: 10,
-    borderRadius: 6,
-    marginBottom: 20,
+  timeButton: {
+    backgroundColor: '#f0f0f0', padding: 10, borderRadius: 6, marginBottom: 8,
     alignItems: 'center',
+  },
+  timeText: { fontWeight: 'bold', color: '#333' },
+  subButton: {
+    backgroundColor: '#AAA', padding: 10, borderRadius: 6,
+    marginBottom: 20, alignItems: 'center',
+  },
+  deleteButton: {
+    backgroundColor: '#ff4444', padding: 10, borderRadius: 6,
+    alignItems: 'center', marginTop: 5,
   },
   saveButton: {
-    backgroundColor: '#007AFF',
-    padding: 12,
-    borderRadius: 6,
-    alignItems: 'center',
+    backgroundColor: '#007AFF', padding: 12, borderRadius: 6, alignItems: 'center',
   },
-  saveText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+  saveText: { color: '#fff', fontWeight: 'bold' },
 });

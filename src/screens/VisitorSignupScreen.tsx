@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { makeRedirectUri } from 'expo-auth-session';
 import { useAuthRequest } from 'expo-auth-session/providers/google';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
@@ -31,7 +30,7 @@ export default function VisitorSignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const redirectUri = makeRedirectUri({ useProxy: true } as any);
+  const redirectUri = 'https://auth.expo.io/@ssproject/SandS';
   const [, response, promptAsync] = useAuthRequest({
     clientId: "1060003938013-itqai2kku5vbp9n09et2hnf7nb4rus8e.apps.googleusercontent.com",
     redirectUri,

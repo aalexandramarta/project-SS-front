@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Redirect, Slot, usePathname, useRouter } from 'expo-router';
 import { Accelerometer, AccelerometerMeasurement } from 'expo-sensors';
 import { useEffect } from 'react';
+import { Platform } from 'react-native'; // ✅ Added
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 
 // Configure foreground notification behavior
@@ -38,8 +39,10 @@ function ProtectedLayout() {
     requestNotificationPermission();
   }, []);
 
-  // 🔥 Fall Detection (Global)
+  // 🔥 Fall Detection (mobile only)
   useEffect(() => {
+    if (Platform.OS === 'web') return; // ✅ Prevents crash on web
+
     const FALL_THRESHOLD_LOW = 0.5;
     const FALL_THRESHOLD_HIGH = 2.5;
     const MAX_TIME_BETWEEN = 1500;
