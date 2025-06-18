@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
+import * as Speech from 'expo-speech';
 import {
   ActivityIndicator,
   FlatList,
@@ -33,7 +34,12 @@ export default function AIChatScreen() {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage: Message = { id: Date.now().toString(), text: input, type: 'sent' };
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: input,
+      type: 'sent',
+    };
+
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setLoading(true);
@@ -54,16 +60,19 @@ export default function AIChatScreen() {
       };
 
       setMessages(prev => [...prev, botMessage]);
+
+      // 🗣️ Read it out loud
+      Speech.speak(botMessage.text);
+
     } catch (err) {
       console.error('AI Error:', err);
-      setMessages(prev => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          text: '❌ Failed to reach AI. Try again later.',
-          type: 'received',
-        },
-      ]);
+      const errorMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        text: '❌ Failed to reach AI. Try again later.',
+        type: 'received',
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      Speech.speak(errorMessage.text); // optional: read error too
     } finally {
       setLoading(false);
     }
