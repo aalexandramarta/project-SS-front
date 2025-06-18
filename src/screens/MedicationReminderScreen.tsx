@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,6 +13,17 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+
+// ✅ FIXED handler
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 type Medication = {
   name: string;
@@ -33,7 +43,9 @@ export default function MedicationReminderScreen() {
     'http://localhost:3000';
 
   const [medications, setMedications] = useState<Medication[]>([]);
-  const [showPicker, setShowPicker] = useState<{ medIndex: number; timeIndex: number } | null>(null);
+  const [showPicker, setShowPicker] = useState<{ medIndex: number; timeIndex: number } | null>(
+    null
+  );
 
   useEffect(() => {
     const requestPermission = async () => {
@@ -123,16 +135,18 @@ export default function MedicationReminderScreen() {
   };
 
   const handleSubmit = async () => {
-    for (const med of medications) {
-      const { name, dosage, instruction, frequency, reminderTimes } = med;
-      const validTimes = reminderTimes.filter((t) => /^\d{2}:\d{2}$/.test(t));
+    try {
+      await Notifications.cancelAllScheduledNotificationsAsync();
 
-      if (!name || !dosage || !frequency || validTimes.length === 0) {
-        Alert.alert('Validation Error', 'Please fill in all fields and valid times.');
-        return;
-      }
+      for (const med of medications) {
+        const { name, dosage, instruction, frequency, reminderTimes } = med;
+        const validTimes = reminderTimes.filter((t) => /^\d{2}:\d{2}$/.test(t));
 
-      try {
+        if (!name || !dosage || !frequency || validTimes.length === 0) {
+          Alert.alert('Validation Error', 'Please fill in all fields and valid times.');
+          return;
+        }
+
         const response = await fetch(`${BASE_URL}/medications`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -154,6 +168,7 @@ export default function MedicationReminderScreen() {
 
         for (const timeStr of validTimes) {
           const [hour, minute] = timeStr.split(':').map(Number);
+
           await Notifications.scheduleNotificationAsync({
             content: {
               title: `💊 Take ${name}`,
@@ -162,18 +177,18 @@ export default function MedicationReminderScreen() {
             trigger: {
               hour,
               minute,
+              second: 0,
               repeats: true,
             } as Notifications.CalendarTriggerInput,
           });
         }
-      } catch (err) {
-        console.error(err);
-        Alert.alert('Error', 'Could not save medication or schedule notification.');
-        return;
       }
-    }
 
-    Alert.alert('Success', 'All medications and reminders set.');
+      Alert.alert('Success', 'All medications and reminders set.');
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Could not save medication or schedule notification.');
+    }
   };
 
   return (
@@ -244,9 +259,12 @@ export default function MedicationReminderScreen() {
       {showPicker && (
         <DateTimePicker
           mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          value={new Date()}
+          display="spinner"
+          value={new Date(
+            `1970-01-01T${medications[showPicker.medIndex].reminderTimes[showPicker.timeIndex]}:00`
+          )}
           onChange={onTimeSelected}
+          textColor="#000"
         />
       )}
     </ScrollView>
@@ -260,29 +278,48 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, alignSelf: 'center' },
   sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 10 },
   card: {
-    borderWidth: 1, borderColor: '#ccc', padding: 15,
-    borderRadius: 8, marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 20,
   },
   label: { marginTop: 10, marginBottom: 5, fontWeight: '500' },
   input: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 6,
-    paddingHorizontal: 10, height: 40, marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    height: 40,
+    marginBottom: 10,
   },
   timeButton: {
-    backgroundColor: '#f0f0f0', padding: 10, borderRadius: 6, marginBottom: 8,
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 8,
     alignItems: 'center',
   },
-  timeText: { fontWeight: 'bold', color: '#333' },
+  timeText: { fontWeight: 'bold', color: '#000' },
   subButton: {
-    backgroundColor: '#AAA', padding: 10, borderRadius: 6,
-    marginBottom: 20, alignItems: 'center',
+    backgroundColor: '#AAA',
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 20,
+    alignItems: 'center',
   },
   deleteButton: {
-    backgroundColor: '#ff4444', padding: 10, borderRadius: 6,
-    alignItems: 'center', marginTop: 5,
+    backgroundColor: '#ff4444',
+    padding: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: 5,
   },
   saveButton: {
-    backgroundColor: '#007AFF', padding: 12, borderRadius: 6, alignItems: 'center',
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 6,
+    alignItems: 'center',
   },
   saveText: { color: '#fff', fontWeight: 'bold' },
 });
