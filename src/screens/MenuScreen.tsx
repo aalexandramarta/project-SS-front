@@ -15,9 +15,7 @@ export default function MenuScreen({ navigation }: any) {
       <Text style={styles.title}>Menu</Text>
 
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => router.push('/ai-voice')}>
-          <Text style={styles.menuItem}>⭐ AI voice assistance</Text>
-        </TouchableOpacity>
+        
 
         <TouchableOpacity onPress={() => router.push('/weather-screen')}>
                   <Text style={styles.menuItem}>⭐ Weather</Text>
@@ -42,13 +40,13 @@ export default function MenuScreen({ navigation }: any) {
         </TouchableOpacity>
 
         {/* ✅ Turned into a working button */}
-        <TouchableOpacity onPress={() => router.push('/qrcode')}>
+        {/* <TouchableOpacity onPress={() => router.push('/qrcode')}>
           <Text style={styles.menuItem}>⭐ Connect Cane/Walker</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('VisitorConnect')}>
           <Text style={styles.menuItem}>⭐ Connect to visitor</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity onPress={() => router.push('/personal-info')}>
           <Text style={styles.menuItem}>⭐ Personal information</Text>

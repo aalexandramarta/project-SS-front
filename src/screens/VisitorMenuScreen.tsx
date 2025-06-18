@@ -19,29 +19,27 @@ export default function VisitorMenuScreen({ navigation }: any) {
       <Text style={styles.title}>Menu</Text>
 
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => router.push('/visitor-ai-voice')}>
-          <Text style={styles.menuItem}>⭐ AI voice assistance</Text>
-        </TouchableOpacity>
+        
 
         <TouchableOpacity onPress={() => router.push('/weather-screen')}>
           <Text style={styles.menuItem}>⭐ Weather</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push('/visitor-maps')}>
+        <TouchableOpacity onPress={() => router.push('/maps')}>
           <Text style={styles.menuItem}>⭐ Maps</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push('/visitor-health')}>
+        {/* <TouchableOpacity onPress={() => router.push('/visitor-health')}>
           <Text style={styles.menuItem}>⭐ Health</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <Text style={styles.divider} />
 
-        <TouchableOpacity onPress={() => router.push('/visitor-ai-chat')}>
+        <TouchableOpacity onPress={() => router.push('/ai-chat')}>
           <Text style={styles.menuItem}>⭐ AI chatbox 24/7</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push('/visitor-info')}>
+        {/* <TouchableOpacity onPress={() => router.push('/visitor-info')}>
           <Text style={styles.menuItem}>⭐ Personal information</Text>
         </TouchableOpacity>
 
@@ -51,7 +49,7 @@ export default function VisitorMenuScreen({ navigation }: any) {
 
         <TouchableOpacity onPress={() => router.push('/visitor-qr-connect')}>
           <Text style={styles.menuItem}>⭐ Connect to account of Cane/Walker</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <Text style={styles.divider} />
 
