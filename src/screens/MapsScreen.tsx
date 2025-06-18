@@ -1,4 +1,5 @@
 import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,41 +15,54 @@ import {
 import { WebView } from 'react-native-webview';
 
 export default function MapsScreen() {
+  const router = useRouter();
   const webViewRef = useRef<WebView>(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [pins, setPins] = useState<any[]>([]);
 
   const fetchNearbyPlaces = async (lat: number, lon: number) => {
-    const categories = ['hospital', 'pharmacy'];
     const allResults: any[] = [];
 
-    for (const type of categories) {
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            type + ' near ' + lat + ',' + lon
-          )}&limit=10`
-        );
-        const data = await res.json();
-        const labeled = data.map((p: any) => ({
-          lat: parseFloat(p.lat),
-          lon: parseFloat(p.lon),
-          name: p.display_name,
-          type,
+    const query = `
+      [out:json][timeout:25];
+      (
+        node["amenity"="pharmacy"](around:5000,${lat},${lon});
+        node["amenity"="hospital"](around:10000,${lat},${lon});
+      );
+      out body;
+    `;
+
+    try {
+      const res = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `data=${encodeURIComponent(query)}`
+      });
+
+      const data = await res.json();
+
+      const parsed = data.elements
+        .filter((e: any) => e.lat && e.lon)
+        .map((e: any) => ({
+          lat: e.lat,
+          lon: e.lon,
+          name: e.tags.name || `${e.tags.amenity}`,
+          type: e.tags.amenity,
         }));
-        allResults.push(...labeled);
-      } catch (err) {
-        console.error(`Failed to fetch ${type}s:`, err);
-      }
+
+      allResults.push(...parsed);
+    } catch (err) {
+      console.error('❌ Failed to fetch POIs from Overpass:', err);
     }
 
-    if (webViewRef.current) {
-      const pinJS = `showPins(${JSON.stringify(allResults)}); true;`;
-      webViewRef.current.injectJavaScript(pinJS);
-    }
+    return allResults;
   };
+
 
   useEffect(() => {
     (async () => {
@@ -63,7 +77,8 @@ export default function MapsScreen() {
       const lon = location.coords.longitude;
 
       setUserLocation({ lat, lon });
-      fetchNearbyPlaces(lat, lon);
+      const fetchedPins = await fetchNearbyPlaces(lat, lon);
+      setPins(fetchedPins);
     })();
   }, []);
 
@@ -79,7 +94,12 @@ export default function MapsScreen() {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           text + ' near ' + userLocation.lat + ',' + userLocation.lon
-        )}&limit=5`
+        )}&limit=5`,
+        {
+          headers: {
+            'User-Agent': 'EpicSpots/1.0 (contact@epicspots.app)',
+          },
+        }
       );
       const data = await res.json();
       setResults(data);
@@ -108,6 +128,63 @@ export default function MapsScreen() {
       webViewRef.current.injectJavaScript(jsCode);
     }
   };
+
+  const styles = StyleSheet.create({
+    centered: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    backButton: {
+      position: 'absolute',
+      top: 50,
+      left: 20,
+      zIndex: 100,
+    },
+    backButtonText: {
+      fontSize: 16,
+      color: '#007AFF',
+      fontWeight: 'bold',
+    },
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      paddingTop: 90,
+      paddingHorizontal: 10,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      backgroundColor: '#fff',
+      borderRadius: 8,
+      padding: 8,
+      alignItems: 'center',
+      elevation: 4,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 3,
+    },
+    input: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 8,
+      borderRadius: 6,
+    },
+    suggestionsContainer: {
+      marginTop: 10,
+      backgroundColor: '#fff',
+      borderRadius: 8,
+      maxHeight: 200,
+    },
+    suggestion: {
+      padding: 10,
+      borderBottomWidth: 1,
+      borderColor: '#eee',
+    },
+  });
 
   if (!userLocation) {
     return (
@@ -161,10 +238,7 @@ export default function MapsScreen() {
               coordinates: [[lon1, lat1], [lon2, lat2]]
             })
           })
-          .then(res => {
-            if (!res.ok) throw new Error("ORS API error");
-            return res.json();
-          })
+          .then(res => res.json())
           .then(data => {
             routeLayer = L.geoJSON(data, {
               style: { color: "blue", weight: 5 }
@@ -183,7 +257,7 @@ export default function MapsScreen() {
             if (!isNaN(loc.lat) && !isNaN(loc.lon)) {
               const icon = L.divIcon({
                 className: 'custom-pin',
-                html: loc.type === 'hospital' ? '🏥' : '💊',
+                html: loc.type === 'pharmacy' ? '💊' : '🏥',
                 iconSize: [24, 24],
                 iconAnchor: [12, 12]
               });
@@ -192,8 +266,9 @@ export default function MapsScreen() {
           });
         }
 
+        const initialPins = ${JSON.stringify(pins)};
+        showPins(initialPins);
         window.setDestination = setDestination;
-        window.showPins = showPins;
       </script>
     </body>
     </html>
@@ -201,79 +276,46 @@ export default function MapsScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
         source={{ html: filledHtml }}
-        style={{ flex: 1 }}
+        style={StyleSheet.absoluteFill}
       />
 
-      <View style={styles.searchContainer}>
-        <TextInput
-          value={query}
-          onChangeText={fetchSuggestions}
-          placeholder="Search hospital, pharmacy..."
-          style={styles.input}
-        />
-        {loading && <ActivityIndicator size="small" style={{ marginLeft: 10 }} />}
-      </View>
-
-      {results.length > 0 && (
-        <View style={styles.suggestionsContainer}>
-          <FlatList
-            keyboardShouldPersistTaps="handled"
-            data={results}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.suggestion}
-                onPress={() => selectLocation(item.lat, item.lon)}
-              >
-                <Text>{item.display_name}</Text>
-              </TouchableOpacity>
-            )}
+      <View style={styles.overlay}>
+        <View style={styles.searchContainer}>
+          <TextInput
+            value={query}
+            onChangeText={fetchSuggestions}
+            placeholder="Search hospital, pharmacy..."
+            style={styles.input}
           />
+          {loading && <ActivityIndicator size="small" style={{ marginLeft: 10 }} />}
         </View>
-      )}
+
+        {results.length > 0 && (
+          <View style={styles.suggestionsContainer}>
+            <FlatList
+              keyboardShouldPersistTaps="handled"
+              data={results}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.suggestion}
+                  onPress={() => selectLocation(item.lat, item.lon)}
+                >
+                  <Text>{item.display_name}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        )}
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    padding: 8,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderColor: '#ccc',
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    borderRadius: 6,
-  },
-  suggestionsContainer: {
-    position: 'absolute',
-    bottom: 60,
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    maxHeight: 200,
-    borderTopWidth: 1,
-    borderColor: '#ccc',
-    zIndex: 10,
-  },
-  suggestion: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-  },
-});
