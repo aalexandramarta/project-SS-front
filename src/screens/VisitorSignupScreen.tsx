@@ -112,7 +112,7 @@ export default function VisitorSignupScreen() {
 
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.header}>Create an account</Text>
-      <Text style={styles.subheader}>For a visitor</Text>
+      <Text style={styles.subheader}>For a free user</Text>
 
       <TextInput
         placeholder="email@domain.com"

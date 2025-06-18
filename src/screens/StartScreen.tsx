@@ -11,11 +11,11 @@ export default function StartScreen() {
       <Image source={logo} style={styles.logoImage} />
 
       <TouchableOpacity style={styles.button} onPress={() => router.push('/choice-screen')}>
-        <Text style={styles.buttonText}>Are you a cane user?</Text>
+        <Text style={styles.buttonText}>Are you a premium user?</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => router.push('/visitor-choice')}>
-        <Text style={styles.buttonText}>Are you a visitor user?</Text>
+        <Text style={styles.buttonText}>Are you a free user?</Text>
       </TouchableOpacity>
     </View>
   );

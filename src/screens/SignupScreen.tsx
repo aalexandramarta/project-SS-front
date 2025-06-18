@@ -111,7 +111,7 @@ export default function SignupScreen() {
 
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.header}>Create an account</Text>
-      <Text style={styles.subheader}>For a cane user</Text>
+      <Text style={styles.subheader}>For a premium user</Text>
 
       <TextInput
         placeholder="email@domain.com"

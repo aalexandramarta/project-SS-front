@@ -13,7 +13,7 @@ export default function ChoiceScreen() {
       </TouchableOpacity>
       
       <Image source={logo} style={styles.logo} />
-      <Text style={styles.title}>Cane User Account</Text>
+      <Text style={styles.title}>Premium User Account</Text>
 
       <TouchableOpacity style={styles.button} onPress={() => router.push('/login')}>
         <Text style={styles.buttonText}>Log In</Text>

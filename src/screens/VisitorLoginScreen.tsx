@@ -56,7 +56,7 @@ export default function VisitorLoginScreen() {
         console.log('✅ Backend response:', response.data);
 
         login(response.data.id, 'visitor');
-        router.replace('/visitor-menu');
+        router.replace('/menu');
       } catch (err) {
         console.error('❌ Google login failed:', err);
         Alert.alert('Error', 'Google login failed.');
@@ -103,7 +103,7 @@ export default function VisitorLoginScreen() {
 
       <Image source={logo} style={styles.logoImage} />
       <Text style={styles.header}>Log in</Text>
-      <Text style={styles.subheader}>For a visitor</Text>
+      <Text style={styles.subheader}>For a free user</Text>
 
       <TextInput
         placeholder="Email"

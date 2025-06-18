@@ -15,7 +15,7 @@ export default function VisitorChoiceScreen() {
 
       <Image source={logo} style={styles.logo} />
 
-      <Text style={styles.title}>Visitor Account</Text>
+      <Text style={styles.title}>Free User Account</Text>
 
       <TouchableOpacity style={styles.button} onPress={() => router.push('/visitor-login')}>
         <Text style={styles.buttonText}>Log In</Text>
