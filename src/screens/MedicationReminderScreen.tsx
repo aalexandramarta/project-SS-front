@@ -1,3 +1,4 @@
+// MedicationReminderScreen.tsx
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
@@ -14,7 +15,6 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
-// ✅ FIXED handler
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -169,17 +169,29 @@ export default function MedicationReminderScreen() {
         for (const timeStr of validTimes) {
           const [hour, minute] = timeStr.split(':').map(Number);
 
+          const now = new Date();
+          const target = new Date();
+          target.setHours(hour);
+          target.setMinutes(minute);
+          target.setSeconds(0);
+          target.setMilliseconds(0);
+
+          let delaySeconds = Math.floor((target.getTime() - now.getTime()) / 1000);
+
+          if (delaySeconds < 60) {
+            delaySeconds = 60;
+          }
+
           await Notifications.scheduleNotificationAsync({
             content: {
               title: `💊 Take ${name}`,
               body: `${dosage} - ${instruction || 'No instructions'}`,
             },
             trigger: {
-              hour,
-              minute,
-              second: 0,
-              repeats: true,
-            } as Notifications.CalendarTriggerInput,
+              type: 'timeInterval',
+              seconds: delaySeconds,
+              repeats: false,
+            } as Notifications.TimeIntervalTriggerInput,
           });
         }
       }
